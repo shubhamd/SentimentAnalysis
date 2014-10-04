@@ -9,7 +9,7 @@ p = open('postweets.txt','r')
 poslines = p.readlines() 
 p.close()
 
-""" poslines is an array of all the positive sentences. p.readlines() splits the input file into an array component lines. 
+""" poslines is an array of all the positive sentences. p.readlines() splits the input file into a list of component lines. 
 
 ['I love their new album\n', 'I want to go and see them live\n', 'I like this band\n',
  'I love the lead singer he is so dreamy\n', 'I adore them they are so great\n', 'They are brilliant\n', 
@@ -44,7 +44,6 @@ tweets = []
 for (sentence,sentiment) in taggedTweets :
 	words = [i.lower() for i in sentence.split() ]
 	tweets.append((words,sentiment)) 
-#print tweets	
 """
 
 ****'words' at each iteration assumes following values resp. 
@@ -79,7 +78,7 @@ for (sentence,sentiment) in taggedTweets :
 
 
 tweets : is an array of tuples. each tuple contains 
-a tweet with splitted words and associated sentiment tag. 
+a tweet with split words and associated sentiment tag. 
 
 [
 	(['i', 'love', 'their', 'new', 'album'], 'positive'), 
@@ -111,7 +110,7 @@ def getwords(tweets):
 #print getwords(tweets)
 
 """
-getwords returns a list of all the words in negative tweets and positive tweets
+getwords returns a list of all the words in negative tweets + positive tweets
 
 ['i', 'love', 'their', 'new', 'album', 'i', 'want', 'to', 'go', 'and', 'see', 'them', 'live', 
 'i', 'like', 'this', 'band', 'i', 'love', 'the', 'lead', 'singer', 'he', 'is', 'so', 'dreamy',
@@ -156,7 +155,7 @@ def getwordfeatures(listofwords):
 """
  words = wordfreq.keys()
 
- so the "words" array contains this(words without repetition/ keys of a hashmap) :
+ so the "words" array contains this : (words without repetition/ keys of a hashmap) :
 
 ['this', 'band', 'i', 'are', 'they', 'is', 'the', 'love', 'them', 'great', 'so', 'to', 
 'want', 'best', 'die', 'live', 'make', 'me', 'see', 'terrible', 'absolutely', 'adore', 
@@ -170,6 +169,11 @@ wordlist = getwordfeatures(getwords(tweets))
 wordlist = [i for i in wordlist if not i in customStopwords ]
 wordlist = [i for i in wordlist if not i in stopwords.words('english')]
 
+"""
+removing all the words that do not add any significant meaning to a sentence. (removing stopwords)
+
+"""
+
 """ 
 refinement of input data completed :
 
@@ -177,23 +181,75 @@ now wordlist contains :
 
 ['love', 'great', 'want', 'best', 'die', 'live', 'make', 'see', 'terrible', 'absolutely',
  'adore', 'album', 'atrocious', 'awful', 'bad', 'better', 'brilliant', 'crap', 'dislike',
+  'dreamy', 'dying', 'ears', 'feel', 'go'brilliant', 'crap', 'dislike',
   'dreamy', 'dying', 'ears', 'feel', 'go', 'hate', 'hell', 'korea', 'lead', 'like', 'much',
    'new', 'north', 'president', 'singer', 'suck', 'think', 'worst']
 """
 
-def featureExtracter(doc):
+def featureExtractor(doc):
 	docwords=set(doc)     # we are converting it into doc, cuz "in" works faster with sets. 
-	features = {}         # an empty dictionary, which will contains input sentence in hashed form. 
+	features = {}         # an empty dictionary, which will contain input sentence in hashed form. 
 	for i in wordlist :
 		features['contains(%s)'%i] = i in docwords
 	return features 
 training_set = nltk.classify.apply_features(featureExtracter, tweets)	
-print training_set 	
+	"""
+
+
+	this function returns the feature set dictionary which marks the words contained in a tweet. 
+
+	eg. for a tweet "I love their new album"
+
+	('I' and 'their' have been removed by the stopwords filtering)
+
+	feature set dictionary is :
+	{
+		'contains(go)': False,
+	 	'contains(suck)': False, 
+	 	'contains(new)': True, 
+	 	'contains(hate)': False,
+	  	'contains(absolutely)': False,
+	    'contains(ears)': False, 
+	    'contains(dying)': False,
+	     'contains(think)': False,
+	     'contains(singer)': False, 
+	     'contains(love)': True, 
+	     'contains(adore)': False, 
+	     'contains(feel)': False, 
+	     'contains(north)': False, 
+	     'contains(lead)': False, 
+	     'contains(album)': True, 
+	     'contains(president)': False, 
+	     'contains(dreamy)': False, 
+	     'contains(die)': False, 
+	     'contains(worst)': False, 
+	     'contains(bad)': False, 
+	     'contains(great)': False, 
+	     'contains(see)': False, 
+	     'contains(like)': False, 
+	     'contains(brilliant)': False, 
+	     'contains(terrible)': False, 
+	     'contains(want)': False, 
+	     'contains(best)': False, 
+	     'contains(hell)': False, 
+	     'contains(live)': False, 
+	     'contains(atrocious)': False, 
+	     'contains(awful)': False, 
+	     'contains(much)': False, 
+	     'contains(make)': False, 
+	     'contains(crap)': False, 
+	     'contains(better)': False, 
+	     'contains(dislike)': False
+	     }
+
+
+
+	"""
 
 """
 
 training_set contains : 
-an array of tupples, each tuple contains two elements : 
+an array of tuples, each tuple contains two elements : 
 
 1. list of key-value pairs(dictionary), in which each key is a word in a tweet. 				
 2. sentiment of the tweet. 
@@ -208,9 +264,55 @@ an array of tupples, each tuple contains two elements :
 and at the end, "positive" is the second element in the first tuple of the list. 
 
 
-same this is repeated for the remaining tweets in "tweets" list. 
 
-[({'contains(korea)': False, 'contains(go)': False, 'contains(suck)': False, 'contains(new)': True, 'contains(hate)': False, 'contains(absolutely)': False, 'contains(ears)': False, 'contains(dying)': False, 'contains(think)': False, 'contains(singer)': False, 'contains(love)': True, 'contains(adore)': False, 'contains(feel)': False, 'contains(north)': False, 'contains(lead)': False, 'contains(album)': True, 'contains(president)': False, 'contains(dreamy)': False, 'contains(die)': False, 'contains(worst)': False, 'contains(bad)': False, 'contains(great)': False, 'contains(see)': False, 'contains(like)': False, 'contains(brilliant)': False, 'contains(terrible)': False, 'contains(want)': False, 'contains(best)': False, 'contains(hell)': False, 'contains(live)': False, 'contains(atrocious)': False, 'contains(awful)': False, 'contains(much)': False, 'contains(make)': False, 'contains(crap)': False, 'contains(better)': False, 'contains(dislike)': False}, 'positive'), ({'contains(korea)': False, 'contains(go)': True, 'contains(suck)': False, 'contains(new)': False, 'contains(hate)': False, 'contains(absolutely)': False, 'contains(ears)': False, 'contains(dying)': False, 'contains(think)': False, 'contains(singer)': False, 'contains(love)': False, 'contains(adore)': False, 'contains(feel)': False, 'contains(north)': False, 'contains(lead)': False, 'contains(album)': False, 'contains(president)': False, 'contains(dreamy)': False, 'contains(die)': False, 'contains(worst)': False, 'contains(bad)': False, 'contains(great)': False, 'contains(see)': True, 'contains(like)': False, 'contains(brilliant)': False, 'contains(terrible)': False, 'contains(want)': True, 'contains(best)': False, 'contains(hell)': False, 'contains(live)': True, 'contains(atrocious)': False, 'contains(awful)': False, 'contains(much)': False, 'contains(make)': False, 'contains(crap)': False, 'contains(better)': False, 'contains(dislike)': False}, 'positive'), ...]
+same thing is repeated for the remaining tweets in "tweets" list. 
+
+[
+	(
+		{'contains(korea)': False, 
+		'contains(go)': False,
+	 	'contains(suck)': False, 
+	 	'contains(new)': True, 
+	 	'contains(hate)': False,
+	  	'contains(absolutely)': False,
+	    'contains(ears)': False, 
+	    'contains(dying)': False,
+	     'contains(think)': False,
+	     'contains(singer)': False, 
+	     'contains(love)': True, 
+	     'contains(adore)': False, 
+	     'contains(feel)': False, 
+	     'contains(north)': False, 
+	     'contains(lead)': False, 
+	     'contains(album)': True, 
+	     'contains(president)': False, 
+	     'contains(dreamy)': False, 
+	     'contains(die)': False, 
+	     'contains(worst)': False, 
+	     'contains(bad)': False, 
+	     'contains(great)': False, 
+	     'contains(see)': False, 
+	     'contains(like)': False, 
+	     'contains(brilliant)': False, 
+	     'contains(terrible)': False, 
+	     'contains(want)': False, 
+	     'contains(best)': False, 
+	     'contains(hell)': False, 
+	     'contains(live)': False, 
+	     'contains(atrocious)': False, 
+	     'contains(awful)': False, 
+	     'contains(much)': False, 
+	     'contains(make)': False, 
+	     'contains(crap)': False, 
+	     'contains(better)': False, 
+	     'contains(dislike)': False
+	     }, 
+	     'positive'), 
+
+		(
+			{'contains(korea)': False, 'contains(go)': True, 'contains(suck)': False, 'contains(new)': False, 'contains(hate)': False, 'contains(absolutely)': False, 'contains(ears)': False, 'contains(dying)': False, 'contains(think)': False, 'contains(singer)': False, 'contains(love)': False, 'contains(adore)': False, 'contains(feel)': False, 'contains(north)': False, 'contains(lead)': False, 'contains(album)': False, 'contains(president)': False, 'contains(dreamy)': False, 'contains(die)': False, 'contains(worst)': False, 'contains(bad)': False, 'contains(great)': False, 'contains(see)': True, 'contains(like)': False, 'contains(brilliant)': False, 'contains(terrible)': False, 'contains(want)': True, 'contains(best)': False, 'contains(hell)': False, 'contains(live)': True, 'contains(atrocious)': False, 'contains(awful)': False, 'contains(much)': False, 'contains(make)': False, 'contains(crap)': False, 'contains(better)': False, 'contains(dislike)': False
+			}, 
+			'positive'), ...]
 
 """
 
@@ -221,7 +323,7 @@ classifier = nltk.NaiveBayesClassifier.train(training_set)
 
 # accept the input, break it into words, and pass it to the classifier.
 
-
+print classifier.show_most_informative_features(5)
 while True:
 	input = raw_input("Please write a sentence. write \"exit\" to quit.\n")
 	if input == 'exit':
@@ -229,5 +331,70 @@ while True:
 	else:
 		input = input.lower()
 		input = input.split()
-		print '\nWe think that the sentiment was ' + classifier.classify(feature_extractor(input)) + ' in that sentence.\n'
+		print '\nWe think that the sentiment was ' + classifier.classify(featureExtractor(input)) + ' in that sentence.\n'
  
+"""
+
+
+summary : 
+
+   refine the input data :
+ 	1. all lowercase, so the classifier doesn't treat same words as two different words. 
+ 	2. remove stopwords( words that do not add any special meaning to the sentence ) eg : i, you, here, there.
+ 	3.arrange the input data in correct format 
+
+ 	correct format :
+ 	 [
+		(['i', 'love', 'their', 'new', 'album'], 'positive'), 
+		(['i', 'want', 'to', 'go', 'and', 'see', 'them', 'live'], 'positive'),
+ 		(['i', 'like', 'this', 'band'], 'positive'), .....
+ 	]	
+ 	4. extract the fetures (features = unique words in the input dataset aka keys of the FreqDist hashmap)
+ 	5. obatain the training dataset by extracting features of all the tweets. 
+ 	6. feed the training set to the NaiveBayesClassifier.
+ 	7. accept input sentences/doc from user and classify it using learnt probability distribution. 
+
+
+ >>>
+
+
+
+
+
+for more detailed explanation on calculations, read "classify" section of this page : http://www.laurentluce.com/posts/twitter-sentiment-analysis-using-python-and-nltk/
+
+
+formula for calcuating P( label | features )
+
+			P( label | features ) = P(label) * P(features | label) / P(feaures)
+
+			label = positive/ negative
+			and 
+			feature = unique words in an input dataset 
+
+
+
+			since probability of features is same for both the labels 
+
+			ignoring it doesn't make any difference. 
+
+			P( label | features ) = P(label) * P(features | label) 
+
+			taking log base 2 on both sides 
+
+			log(P( label | features ) ) = log(P(label)) + log(P(features | label)) 
+
+ • Advantages of Naive Bayes Classifier:
+– Fast to train (single scan). Fast to classify 
+– Not sensitive to irrelevant features
+– Handles real and discrete data
+– Handles streaming data well
+
+
+• Disadvantages of Naive Bayes Classifier :
+– Assumes independence of features
+Disadvantages:
+– Assumes independence of features
+
+
+"""
