@@ -39,6 +39,22 @@ for i in range(len(poslines)):
 
 postagged = zip(poslines,poslist)
 negtagged = zip(neglines,neglist)
+
+"""
+
+how zip works :
+
+a = ["delhi","tech","uni"]
+b=[1,2,3]
+
+zip(a,b)
+outputs 
+[('delhi', 1), ('tech', 2), ('uni', 3)]
+
+
+
+
+"""
 taggedTweets = postagged + negtagged 
 tweets = [] 
 for (sentence,sentiment) in taggedTweets :
